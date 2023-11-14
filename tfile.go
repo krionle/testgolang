@@ -1,11 +1,9 @@
 package main
 
 import (
-	"encoding/json"
-	"filestore-server/meta"
-	"filestore-server/util"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -13,39 +11,32 @@ import (
 
 func tfile(w http.ResponseWriter, res *http.Request) {
 	if res.Method == "GET" {
-		data, err := io.ReadFile("tfile.html")
+		data, err := os.ReadFile("tfile.html")
+		io.WriteString(w, string(data))
 		if err != nil {
-			io.WriteString(data, "html 未找到")
+			io.WriteString(w, "html 未找到")
 			return
 		}
 	} else if res.Method == "POST" {
-		file, head, err := res.FormFile("file")
+		formFile, header, err := res.FormFile("in")
 		if err != nil {
-			fmt.Print("no file")
+			log.Printf("create file no suc:%s", err)
 			return
 		}
-		defer file.Close()
-		fileMeta := meta.fileMeta{
-			FileName: head.Filename,
-			Location: "./" + head.Filename,
-			UploadAt: time.Now().Format("2006-01-02 15:04:05"),
-		}
-		newFile, err := os.Create(fileMeta.Location)
+		defer formFile.Close()
+		save_file, err := os.Create("./test" + header.Filename)
 		if err != nil {
-			fmt.Printf("Filed to create")
 			return
 		}
-		defer newFile.Close()
-		fileMeta.FileSize, err = io.Copy(newFile, file)
+		defer save_file.Close()
+		_, err = io.Copy(save_file, formFile)
 		if err != nil {
-			fmt.Print("File to save")
+			log.Printf("write file no suc:%s", err)
 			return
 		}
-		newFile.Seek(0, 0)
-		fileMeta.FileSha1 = util.FileSha1(newFile)
-		fmt.Print(fileMeta.FileSha1)
-		meta.UpdateFileMeta(fileMeta)
-		http.Redirect(w, res, "./", http.StatusFound)
+
+		// io.WriteString(w, "test"+time.Now().Format("2002-02-01"))
+		fmt.Println("test" + time.Now().Format("2002-02-01"))
 	}
 }
 
