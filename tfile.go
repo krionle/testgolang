@@ -24,7 +24,7 @@ func tfile(w http.ResponseWriter, res *http.Request) {
 			return
 		}
 		defer formFile.Close()
-		save_file, err := os.Create("./test" + header.Filename)
+		save_file, err := os.Create("./" + header.Filename)
 		if err != nil {
 			return
 		}
