@@ -8,9 +8,12 @@ import (
 )
 
 var db *sql.DB
+var qs string
 
 func main() {
 	var err error
+	print("请输入：\n")
+	fmt.Scanf("%s", &qs)
 	db, err = sql.Open("mysql", "root:123456@tcp(localhost:3306)/testdb")
 	defer db.Close()
 	if err != nil {
@@ -23,9 +26,11 @@ func main() {
 	if err = db.Ping(); err != nil {
 		log.Fatalln(err)
 	}
-	showdbs()
+	print("===================\n")
+	print(qs + "\n")
+	tq(qs)
 }
-func showdbs() {
+func showtb() {
 	rows, err := db.Query("select * from testtb")
 	defer rows.Close()
 	if err != nil {
@@ -40,6 +45,32 @@ func showdbs() {
 	}
 	if err = rows.Err(); err != nil {
 		return
+	}
+	return
+}
+func showdb() {
+	tbn, err := db.Query("show databases")
+	if err != nil {
+		return
+	}
+	for tbn.Next() {
+		var name string
+		tbn.Scan(&name)
+		fmt.Println(name)
+	}
+	return
+}
+func tq(sq string) {
+	print(sq + "============\n")
+	rows, err := db.Query("show databases")
+
+	if err != nil {
+		print(err)
+	}
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		fmt.Println(name)
 	}
 	return
 }
